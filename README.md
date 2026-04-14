@@ -25,3 +25,61 @@ Este proyecto demuestra un flujo completo de Limpieza de Datos (Data Cleansing) 
 * Demografía y Segmentación: Agrupación de empleados por rangos generacionales (Juniors, Seniors, Veteranos) mediante el cálculo dinámico de edades.
 * Analítica Avanzada: Uso de Funciones de Ventana (RANK, PARTITION BY) para determinar el posicionamiento salarial relativo de cada empleado dentro de su respectiva área.
 
+### 1. Cálculo de Rangos de Edad
+Para responder a la pregunta de negocio **"¿Cuál es el rango de edad de los empleados?"**, se utilizaron funciones de diferencia de fechas y lógica condicional para agrupar a los colaboradores en cuatro niveles generacionales.
+
+#### **Criterios de Clasificación:**
+* **Juniors:** 0 a 20 años.
+* **Semisenior:** 21 a 30 años.
+* **Senior:** 31 a 50 años.
+* **Veteranos:** Más de 50 años.
+
+#### **Implementación Técnica (T-SQL):**
+A diferencia de la versión original en MySQL, aquí se optimizó el uso de `DATEDIFF` y `CASE` para garantizar la precisión de los cálculos en el entorno de SQL Server.
+
+```sql
+/* Determinación de la distribución de la plantilla activa 
+por categorías generacionales.
+*/
+
+SELECT 
+    CASE
+        WHEN DATEDIFF(YEAR, Birth_Date, GETDATE()) BETWEEN 0 AND 20 THEN 'Juniors'
+        WHEN DATEDIFF(YEAR, Birth_Date, GETDATE()) BETWEEN 21 AND 30 THEN 'Semisenior'
+        WHEN DATEDIFF(YEAR, Birth_Date, GETDATE()) BETWEEN 31 AND 50 THEN 'Senior'
+        ELSE 'Veteranos'
+    END AS Categoria_Edad,
+    COUNT(id_empleado) AS Q_empleados
+FROM limpiezalista
+WHERE Finish_date IS NULL -- Filtrado de empleados activos
+GROUP BY 
+    CASE
+        WHEN DATEDIFF(YEAR, Birth_Date, GETDATE()) BETWEEN 0 AND 20 THEN 'Juniors'
+        WHEN DATEDIFF(YEAR, Birth_Date, GETDATE()) BETWEEN 21 AND 30 THEN 'Semisenior'
+        WHEN DATEDIFF(YEAR, Birth_Date, GETDATE()) BETWEEN 31 AND 50 THEN 'Senior'
+        ELSE 'Veteranos'
+    END;
+
+
+## Analítica Avanzada: Rankings y Comparativas Salariales
+
+En esta fase, se aplicaron **Window Functions** (Funciones de Ventana) para realizar análisis comparativos profundos sin perder el detalle individual de cada registro. Este enfoque es fundamental para auditorías salariales y equidad interna.
+
+### 1. Ranking Salarial por Departamento
+Para identificar a los empleados con mayor remuneración dentro de sus respectivas áreas, se utilizó la función `RANK()`. 
+
+* **Lógica:** Se particionan los datos por `area` y se ordenan de forma descendente por `salary`. Esto permite ver el lugar exacto que ocupa cada colaborador en su "escala salarial local".
+
+```sql
+/* Determinación del escalafón salarial por área
+*/
+
+SELECT 
+    last_name, 
+    area, 
+    salary,
+    RANK() OVER(
+        PARTITION BY area 
+        ORDER BY salary DESC
+    ) AS ranking
+FROM limpiezalista;
