@@ -3,8 +3,8 @@
 Este proyecto demuestra un flujo completo de Limpieza de Datos (Data Cleansing) y Análisis Estadístico utilizando SQL Server. El dataset original, obtenido de fuentes externas y diseñado inicialmente para MySQL, fue migrado y optimizado para T-SQL (Microsoft SQL Server), aplicando técnicas avanzadas de manipulación de strings, manejo de fechas y lógica de negocio.
 
 ## Tecnoligias usadas
-### Motor de Base de Datos: Microsoft SQL Server 2025
-### Lenguaje: T-SQL (Transact-SQL)
+Motor de Base de Datos: Microsoft SQL Server 2025
+Lenguaje: T-SQL (Transact-SQL)
 ### Técnicas: Stored Procedures, CTEs, Window Functions (RANK), Data Casting y Normalización.
 
 ## Proceso de Limpieza y Transformación (ETL)
